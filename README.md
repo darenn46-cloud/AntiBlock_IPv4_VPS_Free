@@ -1,7 +1,12 @@
 # Multi-Echelon Anti-Censorship VPS Bypass Kit (0-Cost Edition)
 > **Схема 100% бесплатного обхода блокировки IPv4 вашего VPS провайдерами и ТСПУ (РКН)**
 
-Этот репозиторий содержит готовую архитектуру, конфигурации и скрипты автоматической настройки отказоустойчивой системы проксирования, разработанной для условий жестких сетевых ограничений и блокировок IP-адресов серверов (включая блокировки протоколов Reality, VLESS, Shadowsocks и целых подсетей хостеров).
+[![Topic: Anti-Censorship](https://img.shields.io/badge/topic-anti--censorship-blue.svg)](#)
+[![Topic: VPN Bypass](https://img.shields.io/badge/topic-vpn--bypass-green.svg)](#)
+[![Topic: Reverse Tunnel](https://img.shields.io/badge/topic-reverse--tunnel-orange.svg)](#)
+[![Topic: 0-Cost](https://img.shields.io/badge/cost-$0%20free-success.svg)](#)
+
+`vpn` • `anti-censorship` • `bypass-censorship` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok` • `tailscale-funnel` • `playit-gg` • `anycast` • `tspu-bypass` • `rkn-bypass` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
 
 ---
 
