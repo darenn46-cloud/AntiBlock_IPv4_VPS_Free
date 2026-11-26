@@ -10,6 +10,33 @@
 
 ---
 
+## 🔍 Для кого этот проект (Популярные проблемы и решения)
+
+Если вы искали решение по любому из этих запросов — этот репозиторий полностью решает вашу проблему:
+
+- **"Заблокировали IP адрес VPS сервера что делать"** — автоматический переход на Anycast CDN (Cloudflare / Zrok / Playit).
+- **"Перестал работать Reality / VLESS / Shadowsocks"** — обход ТСПУ блокировок через WebSocket и туннели.
+- **"РКН заблокировал VPS / подсеть хостинга"** — маскировка за дата-центрами Amazon AWS, Cloudflare и Tailscale.
+- **"Как сделать свой бесплатный VPN без бана"** — пошаговый подъем с нуля за 15 минут.
+- **"Провайдер глушит UDP / WireGuard / OpenVPN"** — протокол Hysteria 2 через Playit.gg пробивает любые ограничения.
+- **"Бесплатный reverse proxy туннель для обхода блокировок"** — Zrok, Cloudflare Workers, Tailscale Funnel.
+- **"Не работает Ютуб / Дискорд / Инстаграм на своем сервере"** — готовые профили маршрутизации для NekoBox и Hiddify.
+
+---
+
+<details>
+<summary><b>Показать полный список ключевых поисковых тегов (SEO Keywords)</b></summary>
+
+### Поисковые запросы на русском:
+`vpn`, `впн`, `бесплатный vpn`, `свой vpn`, `обход блокировок`, `обход блокировки vps`, `заблокировали vps`, `бан ip vps`, `тспу`, `ркн`, `блокировка ютуб`, `обход блокировки discord`, `дискорд vpn`, `youtube vpn`, `не работает vless`, `reality заблокировали`, `как обойти блокировку vps`, `туннель для vpn`, `обратный прокси`, `бесплатный прокси`, `cloudflare vless worker`, `zrok vpn`, `playit vpn`, `tailscale funnel vpn`, `hysteria 2 настройка`, `3x ui настройка`, `nekobox настройка`, `hiddify настройка`, `прокси для россии`, `антицензура`, `white list обход`, `любой провайдер`
+
+### International / Global English Search Queries:
+`free-vpn`, `vps-ban-bypass`, `anti-censorship`, `censorship-circumvention`, `great-firewall-bypass`, `rkn-bypass`, `tspu-bypass`, `unblock-vps`, `free-reverse-proxy`, `free-tunnel`, `vless`, `vless-reality`, `hysteria2`, `xray`, `xray-core`, `3x-ui`, `sing-box`, `nekobox`, `hiddify`, `cloudflare-worker-vless`, `zrok-tunnel`, `tailscale-funnel-proxy`, `playit-gg-tunnel`, `udp-tunneling`, `quic-proxy`, `shadowsocks-blocked`, `iran-censorship`, `russia-censorship`, `isp-blocking`, `dpi-bypass`
+
+</details>
+
+---
+
 ## 🚀 Архитектура: 5 Эшелонов Доступа
 
 Система объединяет 5 независимых уровней доставки трафика. При блокировке любого из них (или всего белого IP сервера) трафик мгновенно переключается на резервные Anycast / CDN / Mesh каналы:
