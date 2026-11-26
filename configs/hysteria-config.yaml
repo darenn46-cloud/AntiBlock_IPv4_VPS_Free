@@ -8,20 +8,18 @@ tls:
 auth:
   type: http
   http:
-    url: http://127.0.0.1:2054/auth
+    url: http://127.0.0.1:2054/api/auth
 
-quic:
-  initStreamReceiveWindow: 8388608
-  maxStreamReceiveWindow: 8388608
-  initConnReceiveWindow: 20971520
-  maxConnReceiveWindow: 20971520
-  maxIdleTimeout: 30s
-  keepAlivePeriod: 10s
+trafficStats:
+  listen: 127.0.0.1:9999
+  secret: change_this_stats_secret
 
-bandwidth:
-  up: 100 mbps
-  down: 100 mbps
+masquerade:
+  type: proxy
+  proxy:
+    url: https://bing.com
+    rewriteHost: true
 
-ignoreClientBandwidth: false
-disableUDP: false
-udpIdleTimeout: 60s
+outbounds:
+  - name: default
+    type: direct

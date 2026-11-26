@@ -1,54 +1,41 @@
-# ☁️ Пошаговая инструкция: Настройка Cloudflare Worker для VLESS over WebSocket
+# ☁️ Пошаговая инструкция: Cloudflare Worker для VLESS over WebSocket
 
-Cloudflare Workers позволяют бесплатно проксировать TCP/WebSocket трафик через глобальную сеть Cloudflare CDN (до 100 000 бесплатных запросов в сутки). Ваш VPS скрывается за миллионами Anycast IP-адресов Cloudflare.
+Cloudflare Workers позволяют бесплатно проксировать WebSocket-трафик через глобальную сеть Cloudflare CDN (до 100 000 бесплатных запросов в сутки). Клиент подключается к IP Cloudflare, а Worker через `cloudflare:sockets` устанавливает прямое TCP-соединение с вашим VPS на порт `8080`.
 
 ---
 
 ## 1. Подготовка на VPS (Inbound в 3X-UI)
-Трафик от Cloudflare Worker приходит на порт вашего сервера по протоколу WebSocket:
-1. Зайдите в панель 3X-UI (`http://<YOUR_VPS_IP>:2053`).
-2. Перейдите в **Inbounds** -> нажмите **Add Inbound**.
-3. Задайте настройки:
+1. Зайдите в панель 3X-UI (`https://<YOUR_VPS_IP>:2053`).
+2. Создайте Inbound:
    - **Protocol:** `vless`
-   - **Port:** `8080` (или `80`)
+   - **Port:** `8080`
    - **Transmission:** `ws` (WebSocket)
    - **Path:** `/vless`
-   - **Security:** `none` (шифрование TLS берет на себя Cloudflare на внешнем периметре)
-   - **Client:** сгенерируйте и скопируйте **UUID** (он понадобится для воркера).
-4. Сохраните инбаунд и нажмите **Restart Service**.
+   - **Security:** `none` (внешний TLS держит Cloudflare)
+3. Убедитесь, что порт `8080/tcp` разрешён в фаерволе (`ufw allow 8080/tcp`).
 
 ---
 
-## 2. Создание Worker в панели Cloudflare
-1. Зарегистрируйтесь или войдите на [dash.cloudflare.com](https://dash.cloudflare.com/).
-2. В левом меню выберите **Compute (Workers & Pages)** -> **Workers & Pages**.
-3. Нажмите кнопку **Create application** -> вкладка **Workers** -> **Create Worker**.
-4. Введите понятное имя (например, `vless-edge-proxy`) и нажмите **Deploy**.
-5. Нажмите кнопку **Edit code**.
-
----
-
-## 3. Установка готового кода VLESS WebSocket
-1. Полностью очистите редактор кода в Cloudflare.
-2. Вставьте рабочий скрипт из файла [configs/cloudflare-worker.js](file:///s:/VPN/vps-bypass-kit/configs/cloudflare-worker.js).
-3. В коде (или во вкладке **Settings** -> **Variables**) укажите:
-   - `UUID` = ваш UUID клиента из шага 1.
-   - `PROXYIP` = чистый IP/домен Cloudflare CDN (например, `104.16.1.1` или `www.speedtest.net`).
-   - `VPS_HOST` = `<YOUR_VPS_IP>` (или домен сервера).
+## 2. Создание и настройка Worker в Cloudflare
+1. Войдите на [dash.cloudflare.com](https://dash.cloudflare.com/) ➔ **Compute (Workers & Pages)** ➔ **Create Worker**.
+2. Откройте **Edit code**, удалите шаблон и вставьте код из файла [`configs/cloudflare-worker.js`](../configs/cloudflare-worker.js).
+3. Перейдите в **Settings** ➔ **Variables and Secrets** и задайте переменные окружения:
+   - `VPS_HOST` = реальный внешний IPv4 вашего VPS *(не используйте домен, проксированный самим Cloudflare — `cloudflare:sockets` блокирует исходящие подключения к IP-диапазонам Cloudflare)*.
    - `VPS_PORT` = `8080`.
-4. Нажмите **Deploy** (или **Save and deploy**).
+   - `WS_PATH` = `/vless`.
+4. Нажмите **Deploy**. Ваш воркер доступен по адресу `https://<WORKER_NAME>.<SUBDOMAIN>.workers.dev`.
 
 ---
 
-## 4. Настройка клиента (NekoBox / Hiddify / v2rayN)
-Создайте конфигурацию VLESS:
-- **Address:** `104.16.1.1` (или любой чистый незаблокированный IP Cloudflare / провайдерский CDN)
+## 3. Настройка клиента (NekoBox / Hiddify / v2rayN)
+Создайте профиль `VLESS`:
+- **Address:** чистый IPv4 адрес Cloudflare Anycast (например, `104.16.1.1`, `104.18.0.1` или незаблокированный домен вроде `www.speedtest.net`) — это защитит от попытки подключения по IPv6 на Windows без IPv6-маршрута.
 - **Port:** `443`
-- **UUID:** ваш UUID
-- **Network / Transport:** `ws` (WebSocket)
+- **UUID:** ваш UUID из Inbound `8080` в 3X-UI
+- **Network / Transport:** `ws`
 - **Path:** `/vless`
-- **TLS:** `true` (Включен)
-- **SNI (Server Name):** домен вашего воркера, например `vless-edge-proxy.ваше_имя.workers.dev`
-- **Host Header:** `vless-edge-proxy.ваше_имя.workers.dev`
+- **TLS:** `true` (`alpn`: `http/1.1`, `fp`: `chrome`)
+- **SNI:** `<WORKER_NAME>.<SUBDOMAIN>.workers.dev`
+- **Host Header:** `<WORKER_NAME>.<SUBDOMAIN>.workers.dev`
 
-> 💡 **Преимущество:** Даже если провайдер полностью заблокирует IP-адрес вашего VPS, подключение продолжит работать на максимальной скорости, так как клиент подключается к Cloudflare, а не к вашему серверу напрямую.
+> 💡 Если вы указываете в `Address` сам домен `*.workers.dev`, обязательно включите в профиле **Domain Strategy = `IPv4 Only`**, чтобы избежать ошибки `connectex: The requested address is not valid in its context` (`WinSock 10049`).

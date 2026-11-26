@@ -5,6 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=root
+WorkingDirectory=/etc/playit
+# Replace with `--secret <YOUR_PLAYIT_SECRET>` if running headless without /etc/playit/playit.toml
 ExecStart=/usr/local/bin/playit
 Restart=always
 RestartSec=5

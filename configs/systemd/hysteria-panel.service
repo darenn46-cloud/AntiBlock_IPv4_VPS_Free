@@ -1,0 +1,21 @@
+[Unit]
+Description=Lightweight Hysteria 2 Web Management Panel
+After=network.target hysteria-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/hysteria-panel
+# Customize before starting:
+Environment=PLAYIT_IP=<YOUR_PLAYIT_IPV4>
+Environment=PLAYIT_PORT=17635
+Environment=HY_ADMIN_USER=admin
+Environment=HY_ADMIN_PASS=ChangeMe123!
+Environment=HY_STATS_SECRET=change_this_stats_secret
+Environment=HY_SNI=bing.com
+ExecStart=/usr/bin/python3 /opt/hysteria-panel/app.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

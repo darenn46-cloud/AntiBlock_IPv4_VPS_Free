@@ -1,85 +1,59 @@
-# 🎮 Пошаговая инструкция: Настройка Playit.gg для Hysteria 2 (UDP)
+# 🎮 Пошаговая инструкция: Playit.gg для Hysteria 2 (UDP)
 
-Playit.gg предоставляет **полностью бесплатный туннель без ограничений по трафику** через Anycast IP-адреса. Это идеальный транспорт для протокола **Hysteria 2 (QUIC/UDP)**, позволяющий обходить блокировки провайдеров и пробивать любые строгие NAT и фильтры ТСПУ.
-
----
-
-## 1. Регистрация аккаунта Playit
-1. Перейдите на официальный сайт [playit.gg](https://playit.gg/).
-2. Нажмите **Log in** / **Sign up** и создайте бесплатный аккаунт (по почте или через Google/Discord).
+Playit.gg предоставляет **бесплатный Anycast UDP-туннель** без жёстких лимитов на гигабайты. Это идеальный транспорт для **Hysteria 2 (QUIC/UDP)**, когда прямой IPv4 сервера заблокирован или оператор режет/душит трафик.
 
 ---
 
-## 2. Установка агента на VPS
-Выполните на сервере:
-```bash
-# Скачивание актуального бинарника playit
-curl -SsL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/playit.gpg
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" | tee /etc/apt/sources.list.d/playit.list
-apt update && apt install -y playit
-```
-*(Или скрипт из репозитория `scripts/setup_server.sh` сделает это автоматически).*
+## 1. Регистрация и установка агента
+1. Создайте бесплатный аккаунт на [playit.gg](https://playit.gg/).
+2. Установите `playit` на VPS (`scripts/setup_server.sh` делает это автоматически).
 
 ---
 
-## 3. Привязка агента к вашему аккаунту (Claiming Agent)
-1. Запустите в терминале команду первичной настройки:
+## 2. Привязка агента (Claim)
+1. Запустите на сервере:
    ```bash
    playit setup
    ```
-2. В терминале появится ссылка вида:
-   ```text
-   Visit https://playit.gg/claim/<УНИКАЛЬНЫЙ_КОД> to link this agent
-   ```
-3. Откройте эту ссылку в браузере под своим аккаунтом Playit.
-4. Нажмите кнопку **Add Agent**.
-5. Сервер сгенерирует секретный ключ и сохранит его в `/etc/playit/playit.toml`.
+2. Откройте в браузере выданную ссылку `https://playit.gg/claim/<КОД>` и подтвердите добавление агента.
+3. Конфигурация сохранится в `/etc/playit/playit.toml` (либо скопируйте секрет из консоли для запуска через `--secret <SECRET>`).
 
 ---
 
-## 4. Создание UDP-туннеля для Hysteria 2 (КРИТИЧЕСКИ ВАЖНО)
+## 3. Создание UDP-туннеля (КРИТИЧЕСКИ ВАЖНО)
 
-> ⚠️ **ВНИМАНИЕ! НЕ ВЫБИРАЙТЕ ИГРОВЫЕ ШАБЛОНЫ!**
-> По умолчанию в веб-интерфейсе Playit первыми кнопками крупно предлагаются шаблоны для игр:
-> - ❌ **Minecraft Java** (это TCP 25565 — работать НЕ будет!)
-> - ❌ **Minecraft Bedrock**
-> - ❌ **Terraria / Valheim**
->
-> Протокол **Hysteria 2 работает исключительно поверх UDP (QUIC)**! Выбор Minecraft или TCP сломает подключение.
+> [!WARNING]
+> **НЕ ВЫБИРАЙТЕ ИГРОВЫЕ ШАБЛОНЫ!**
+> - ❌ **Minecraft Java / Terraria** — это TCP-шаблоны, Hysteria 2 работать не будет!
+> - **Hysteria 2 работает исключительно поверх UDP (QUIC).**
 
-### Правильный пошаговый выбор:
-1. В веб-панели Playit.gg перейдите в раздел **Tunnels** ➔ нажмите кнопку **Add Tunnel**.
-2. В блоке выбора типа нажмите вкладку/переключатель **`Custom`** (Пользовательский).
-3. В выпадающем меню выберите строго **`UDP`** (НЕ TCP!).
-4. Заполните поля:
-   - **Local Port:** введите строго `20443` (порт сервера Hysteria 2 на вашем VPS).
-   - **Local IP / Address:** `127.0.0.1` (localhost).
-5. Нажмите кнопку **Add Tunnel** (Создать туннель).
-6. Playit сгенерирует для вас выделенный шлюз:
-   - Буквенный домен: например, `xxxx-xxx.tun.ply.gg:17635`
-   - **Постоянный Anycast IPv4:** например, `147.185.221.217:17635`
+1. В панели Playit.gg откройте **Tunnels** ➔ **Add Tunnel**.
+2. Выберите тип **`Custom`** ➔ **`UDP`**.
+3. Укажите:
+   - **Local IP:** `127.0.0.1`
+   - **Local Port:** `20443`
+4. Нажмите **Add Tunnel**. Вы получите адрес вида:
+   - Домен: `<RANDOM>.tun.ply.gg:<PORT>`
+   - **Anycast IPv4:** `<PLAYIT_IPV4>:<PORT>` (например, `147.185.x.x:17635`)
 
 ---
 
-## 5. Настройка автозапуска Playit как системного сервиса (Systemd)
-Чтобы туннель работал непрерывно и поднимался после перезагрузки VPS:
+## 4. Запуск Hysteria 2 и автозапуск
 ```bash
-# Скопируйте готовый сервис из репозитория
-sudo cp configs/systemd/playit.service /etc/systemd/system/playit.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now playit
-sudo systemctl status playit
+# Проверьте /etc/hysteria/config.yaml и переменные в /etc/systemd/system/hysteria-panel.service
+sudo systemctl enable --now hysteria-server hysteria-panel playit
 ```
 
 ---
 
-## 6. Настройка клиента (NekoBox / Hiddify / v2rayN)
-Создайте профиль Hysteria 2:
-- **Server:** Anycast IP-адрес Playit (например, `147.185.221.217`)
-- **Port:** порт Playit (например, `17635`)
-- **Auth / Password:** пароль, настроенный в панели Hysteria
-- **SNI:** домен вашего самоподписанного сертификата (например, `bing.com` или имя сервера)
-- **AllowInsecure / Skip Cert Verify:** `true` (если сертификат самоподписанный)
-- **Hop Interval:** `0` (отключить port hopping, так как порт фиксирован туннелем)
+## 5. Настройка клиента (NekoBox / Hiddify / v2rayN)
+- **Protocol:** `Hysteria 2`
+- **Server:** **числовой Anycast IPv4 Playit** (`<PLAYIT_IPV4>`) — не домен `*.tun.ply.gg`!
+- **Port:** `<PORT>`
+- **Password / Auth:** `<USER>:<PASSWORD>` (или пароль)
+- **SNI:** `bing.com`
+- **AllowInsecure:** `true`
+- **Hop Interval:** `0`
 
-> 💡 **Совет:** Указывайте именно **числовой IPv4** (`147.185.221.217`), а не буквенный домен `tun.ply.gg`. Это защищает от попытки клиента подключиться через нерабочий IPv6 в сетях без поддержки IPv6.
+> 💡 **Почему важно вписывать IPv4 вместо домена `tun.ply.gg`:**  
+> Домены Playit возвращают IPv6 (`AAAA`) записи. В Windows-сетях без IPv6 клиент может попытаться подключиться по IPv6 и упасть с ошибкой **`connectex: The requested address is not valid in its context` (WinSock 10049)**. Прямой IPv4 (или `Domain Strategy = ipv4_only`) полностью решает проблему.

@@ -10,7 +10,7 @@
 > **От автора (by darenN):**  
 > *Данные действия протестированы лично мной, обходы искал с июня 2026 года, данные обходы не нашел в свободных источниках, все решения и победы достиг с помощью бесплатных подписок на ИИ.*
 
-`vpn` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok` • `tailscale-funnel` • `playit-gg` • `anycast` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
+`vpn` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok2` • `tailscale-funnel` • `playit-gg` • `anycast` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
 
 ---
 
@@ -18,13 +18,13 @@
 
 Если вы искали решение по любому из этих запросов — этот репозиторий полностью решает вашу проблему:
 
-- **"Заблокировали IP адрес VPS сервера что делать"** — автоматический переход на Anycast CDN (Cloudflare / Zrok / Playit).
-- **"Перестал работать Reality / VLESS / Shadowsocks"** — обход сетевых фильтров через WebSocket и туннели.
+- **"Заблокировали IP адрес VPS сервера что делать"** — автоматический переход на Anycast CDN / релеи (Cloudflare / Zrok / Tailscale / Playit).
+- **"Перестал работать Reality / VLESS / Shadowsocks"** — обход сетевых фильтров через WebSocket и обратные туннели.
 - **"Провайдер заблокировал VPS / подсеть хостинга"** — маскировка за дата-центрами Amazon AWS, Cloudflare и Tailscale.
 - **"Как сделать свой бесплатный VPN без бана"** — пошаговый подъем с нуля за 15 минут.
 - **"Провайдер глушит UDP / WireGuard / OpenVPN"** — протокол Hysteria 2 через Playit.gg пробивает любые ограничения.
-- **"Бесплатный reverse proxy туннель"** — Zrok, Cloudflare Workers, Tailscale Funnel.
-- **"Не работает Ютуб / Дискорд / Инстаграм на своем сервере"** — готовые профили маршрутизации для NekoBox и Hiddify.
+- **"Бесплатный reverse proxy туннель"** — Zrok v2, Cloudflare Workers, Tailscale Funnel.
+- **"Не работает Ютуб / Дискорд / Инстаграм на своем сервере"** — готовые профили для NekoBox и Hiddify.
 
 ---
 
@@ -41,57 +41,59 @@
 
 ---
 
-## 🚀 Архитектура: 5 Эшелонов Доступа
+## 🚀 Архитектура: 5 Эшелонов Доступа (без конфликтов портов)
 
-Система объединяет 5 независимых уровней доставки трафика. При блокировке любого из них (или всего белого IP сервера) трафик мгновенно переключается на резервные Anycast / CDN / Mesh каналы:
+Система объединяет 5 независимых уровней доставки трафика с **разделёнными портами и единым локальным бэкендом Xray (`127.0.0.1:8080`)**. При блокировке прямого IP или любого из каналов трафик мгновенно переключается на остальные эшелоны:
 
 ```mermaid
 flowchart TD
     Client["Клиент (NekoBox / Hiddify / v2rayN)"]
 
     subgraph Echelons ["5 Эшелонов Доступа"]
-        E1["1. Direct VLESS Reality:443 (Основной)"]
-        E2["2. Cloudflare Worker WS:8080 (Резерв CDN)"]
-        E3["3. Zrok AWS Global Accelerator (Anycast TCP)"]
-        E4["4. Tailscale Funnel SNI:443 (Mesh Anycast)"]
+        E1["1. Direct VLESS Reality :443 (+ резерв :25652)"]
+        E2["2. Cloudflare Worker :443 -> VPS :8080 (CDN)"]
+        E3["3. Zrok v2 AWS Global Accelerator :443 (Anycast TCP)"]
+        E4["4. Tailscale Funnel :8443 (Mesh Anycast)"]
         E5["5. Hysteria 2 UDP via Playit.gg (Anycast UDP)"]
     end
 
     subgraph VPS ["Ваш VPS (Ubuntu 24.04)"]
-        XrayReality["Xray Core (Reality 443)"]
-        XrayWS["Xray Core (VLESS WS 8080)"]
-        Hysteria["Hysteria 2 (UDP 20443 + Webhook Auth)"]
+        XrayReality["Xray Core (Reality TCP :443 / :25652)"]
+        XrayWS["Xray Core (VLESS WS 127.0.0.1:8080 /vless)"]
+        Hysteria["Hysteria 2 (:20443 UDP + Panel/Auth :2054)"]
     end
 
-    Client -->|Прямой IP| E1 --> XrayReality
-    Client -->|Бесплатный Cloudflare| E2 --> XrayWS
-    Client -->|AWS Anycast IP:443| E3 --> XrayWS
-    Client -->|Tailscale TLS:443| E4 --> XrayWS
-    Client -->|Playit Anycast UDP| E5 --> Hysteria
+    Client -->|Прямой IPv4:443| E1 --> XrayReality
+    Client -->|Cloudflare Edge:443| E2 --> XrayWS
+    Client -->|AWS Anycast IPv4:443| E3 --> XrayWS
+    Client -->|Tailscale Edge:8443| E4 --> XrayWS
+    Client -->|Playit Anycast IPv4:UDP| E5 --> Hysteria
 ```
 
 ### Сводная таблица эшелонов
 
-| Эшелон | Протокол | Канал доставки | Защита от блокировки | Стоимость | Назначение |
-|---|---|---|---|---|---|
-| **1. Direct Reality** | VLESS Reality | Прямой IP:443 | Маскировка под чужой TLS SNI | $0 | Максимальная скорость и низкий пинг |
-| **2. Cloudflare Worker** | VLESS WS | Бесплатный воркер CF | IP вашего сервера скрыт за CDN | $0 | Бесплатный CDN-прокси |
-| **3. Zrok AWS Tunnel** | VLESS WS | AWS Anycast Accelerator | Обход бана IPv4 через сеть Amazon | $0 | Надежный TCP резерв |
-| **4. Tailscale Funnel** | VLESS WS | Tailscale Funnel Anycast | Трафик идет через дата-центры Tailscale | $0 | Альтернативный Mesh-туннель |
-| **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Anycast UDP Relay | Обход бана UDP и пробитие любых NAT | $0 | Игры, звонки, плохой интернет |
+| Эшелон | Протокол | Внешний порт | Локальный вход VPS | Защита от блокировки | Стоимость | Назначение |
+|---|---|---|---|---|---|---|
+| **1. Direct Reality** | VLESS Reality | `:443` *(резерв `:25652`)* | Xray Reality `:443` | Маскировка под Apple TLS (`gateway.icloud.com:443`) | $0 | Максимальная скорость и минимальный пинг |
+| **2. Cloudflare Worker** | VLESS WS | `:443` (CF CDN) | Xray WS `:8080` (`/vless`) | IP VPS скрыт за сетью Cloudflare | $0 | Обход бана IP через Edge Relay |
+| **3. Zrok v2 AWS Tunnel** | VLESS WS | `:443` (AWS ALB) | Xray WS `127.0.0.1:8080` | Трафик идёт через Amazon Global Accelerator | $0 | Надёжный Anycast TCP резерв |
+| **4. Tailscale Funnel** | VLESS WS | **`:8443`** *(без конфликта с 443!)* | Xray WS `127.0.0.1:8080` | Трафик идёт через дата-центры Tailscale | $0 | Белый домен с Let's Encrypt без WireGuard на клиенте |
+| **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Playit UDP `:PORT` | Hysteria `:20443` UDP | Обход бана IP и блокировок UDP/NAT | $0 | Звонки (Discord/TG), игры, плохой интернет |
 
 <img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/3c8e3723-2d3a-4026-8015-5ddd574378d6" />
 
-
+> [!IMPORTANT]
+> **Почему Tailscale Funnel вынесен на порт `8443` (а не `443`):**  
+> При запуске `tailscale funnel --bg --https=443 ...` демон `tailscaled` занимает порт `443` на интерфейсе `tailscale0` (`100.x.y.z:443`). Если в 3X-UI инбаунд `443` слушает все интерфейсы по умолчанию (`0.0.0.0:443`), Xray падает с ошибкой **`bind: address already in use`** и Stealth Reality перестаёт работать (а перенос Stealth на нестандартный порт вроде `444` ломает логику маскировки под Apple:443).  
+> * По умолчанию в этом комплекте **Stealth Reality забирает настоящий `443`**, а **Tailscale Funnel работает на официальном порту `8443`** (`443`, `8443`, `10000` разрешены в Tailscale).  
+> * *Если вам принципиально нужны ОБА сервиса на `443`:* в 3X-UI у инбаунда `443-reality` задайте в поле **`Listen`** конкретный IP сетевого интерфейса VPS (`ip -4 route get 1.1.1.1`) вместо пустого `0.0.0.0` — тогда Xray сядет на `eth0/ens3:443`, а Tailscale на `tailscale0:443`, и конфликта сокетов не будет.
 
 ---
 
 ## 🛠️ Быстрый старт на чистом сервере
 
-### 1. Подготовка сервера
 Требования: Ubuntu 20.04 / 22.04 / 24.04, 1 vCPU, 1 GB RAM.
 
-Склонируйте репозиторий и запустите установщик:
 ```bash
 git clone https://github.com/darenn46-cloud/AntiBlock_IPv4_VPS_Free.git /opt/vps-bypass-kit
 cd /opt/vps-bypass-kit/scripts
@@ -100,88 +102,81 @@ sudo ./setup_server.sh
 ```
 
 Скрипт автоматически:
-1. Включает TCP BBR и оптимизирует сетевой стек ядра Linux.
-2. Подключает 2 GB Swap-памяти для стабильности демонов.
-3. Устанавливает и настраивает **3X-UI** (Xray Core).
-4. Устанавливает **Hysteria 2** с панелью управления и гибридной авторизацией.
-5. Загружает клиенты туннелей: **Zrok**, **Playit.gg**, **Tailscale**.
+1. Включает TCP BBR и создаёт 1 GB Swap.
+2. Устанавливает **3X-UI** (Xray Core).
+3. Устанавливает **Hysteria 2**, генерирует TLS-сертификат, копирует `config.yaml` и веб-панель `/opt/hysteria-panel/app.py`.
+4. Скачивает **zrok2**, **Playit.gg** и **Tailscale**.
+5. Копирует systemd-шаблоны из `configs/systemd/` и настраивает правила `ufw`.
 
 ---
 
 ## ⚙️ Пошаговая настройка каждого эшелона
 
-### Эшелон 1: VLESS Reality (Порт 443)
-- Настраивается через панель 3X-UI (`http://<YOUR_VPS_IP>:2053`).
-- **Inbound:** Port `443`, Protocol `VLESS`, Security `Reality`.
-- **Dest / SNI:** `gateway.icloud.com:443` (или `dl.google.com:443`).
-- Клиент подключается напрямую на `<YOUR_VPS_IP>:443`.
+### Эшелон 1: VLESS Reality Stealth (Порт 443 + резерв 25652)
+- Откройте панель 3X-UI (`https://<YOUR_VPS_IP>:2053`) и импортируйте схему из [`configs/3x-ui-inbounds-template.json`](configs/3x-ui-inbounds-template.json).
+- **Inbound #1 (`inbound-443-reality`):** Port `443`, Protocol `VLESS`, Security `Reality`, Dest `gateway.icloud.com:443`, `flow: ""` (пусто для совместимости).
+- **Inbound #2 (`inbound-25652-reality-backup`):** запасной Reality-канал на нестандартном порту (`sony.com:443`).
+- **Inbound #3 (`inbound-8080-ws`):** Port `8080`, Protocol `VLESS`, Network `ws`, Path `/vless`, Security `none` — единая точка входа для Эшелонов 2, 3 и 4.
+- **Важно для клиента (NekoBox / sing-box / xray-core):** если при `fp=chrome` на `gateway.icloud.com` возникает сбой рукопожатия (постквантовый TLS в новых версиях `xray.exe`), переключите `fp` на `ios` или `edge` (либо используйте `sing-box`).
 
 ### Эшелон 2: Cloudflare Worker + VLESS WS (Порт 8080)
-- 📖 **Подробная инструкция:** См. файл [docs/CLOUDFLARE_WORKER_GUIDE.md](docs/CLOUDFLARE_WORKER_GUIDE.md)
-1. В 3X-UI создается Inbound: Port `8080`, Protocol `VLESS`, Network `ws`, Path `/vless`.
-2. В Cloudflare создается бесплатный Worker со скриптом из `configs/cloudflare-worker.js`.
-3. Замените в воркере:
-   - `PROXYIP` = чистый Cloudflare IP/домен.
-   - `USER_UUID` = UUID вашего клиента.
-   - `VPS_HOST` = IP или домен вашего VPS.
+- 📖 **Подробная инструкция:** [`docs/CLOUDFLARE_WORKER_GUIDE.md`](docs/CLOUDFLARE_WORKER_GUIDE.md)
+1. В Cloudflare создайте Worker с рабочим кодом из [`configs/cloudflare-worker.js`](configs/cloudflare-worker.js) *(использует нативный `cloudflare:sockets` для прямого WebSocket-моста к вашему VPS без стороннего домена)*.
+2. Задайте переменные окружения (`Settings -> Variables`): `VPS_HOST` (ваш IPv4 VPS), `VPS_PORT` (`8080`), `WS_PATH` (`/vless`).
+3. На клиенте указывайте `Address`: чистый IPv4 Cloudflare (`104.16.1.1`), `Port`: `443`, `SNI`/`Host`: `<WORKER>.<SUB>.workers.dev`, `Path`: `/vless`.
 
-### Эшелон 3: Zrok AWS Anycast Tunnel (Порт 8080)
-1. Зарегистрируйтесь бесплатно на [zrok.io](https://zrok.io).
-2. Активируйте окружение на сервере:
+### Эшелон 3: Zrok v2 AWS Anycast Tunnel (Порт 8080 -> 443)
+- 📖 **Подробная инструкция:** [`docs/TAILSCALE_ZROK_GUIDE.md`](docs/TAILSCALE_ZROK_GUIDE.md)
+1. Зарегистрируйтесь на [zrok.io](https://zrok.io) / [myzrok.io](https://myzrok.io) и активируйте сервер:
    ```bash
-   zrok enable <YOUR_ZROK_TOKEN>
-   ```
-3. Запустите сервис туннеля (шаблон в `configs/systemd/zrok2-tunnel.service`):
-   ```bash
+   zrok2 enable <YOUR_ZROK_TOKEN>
    sudo systemctl enable --now zrok2-tunnel
    ```
-4. Туннель выдаст публичный адрес вида `https://<YOUR_RANDOM_NAME>.shares.zrok.io`.
-5. **Важно для клиентов (Hiddify / NekoBox):**
-   - Address: `52.223.10.144` (или `35.71.189.214` — IP-адреса AWS Global Accelerator).
-   - Port: `443`, TLS: `true`.
-   - SNI / Host: `<YOUR_RANDOM_NAME>.shares.zrok.io`.
-   - Path: `/vless`.
-   - HTTP Headers: `{"skip_zrok_interstitial": "true"}` (предотвращает заглушку Zrok).
+2. Узнайте публичный адрес `<ID>.shares.zrok.io` (`journalctl -u zrok2-tunnel -n 30`) и его Anycast IPv4 (через `dig +short <ID>.shares.zrok.io`).
+3. **В клиентах (NekoBox / Hiddify):**
+   - `Address`: Anycast IPv4 AWS (вместо домена, чтобы избежать ошибки IPv6 на Windows), `Port`: `443`, `TLS`: `true`, `ALPN`: `http/1.1`.
+   - `SNI` и `Host`: `<ID>.shares.zrok.io`, `Path`: `/vless`.
+   - Для **Hiddify** обязательно добавьте HTTP-заголовок `"skip_zrok_interstitial": "true"` (иначе браузерный User-Agent Hiddify получит HTML-заглушку `HTTP 200 OK` вместо WebSocket `101`).
 
-### Эшелон 4: Tailscale Funnel (Порт 8080 -> 443)
-1. Зарегистрируйтесь на [tailscale.com](https://tailscale.com).
-2. Авторизуйте сервер:
+### Эшелон 4: Tailscale Funnel (Порт 8080 -> 8443)
+- 📖 **Подробная инструкция:** [`docs/TAILSCALE_ZROK_GUIDE.md`](docs/TAILSCALE_ZROK_GUIDE.md)
+1. Зарегистрируйтесь на [tailscale.com](https://tailscale.com), включите **MagicDNS** и **Funnel** в ACL админки.
+2. Авторизуйте VPS и запустите проброс на порт `8443` (не трогая `443`!):
    ```bash
    sudo tailscale up --authkey=<YOUR_TAILSCALE_KEY>
+   sudo tailscale funnel --bg --https=8443 http://127.0.0.1:8080
    ```
-3. Включите Funnel в фоновом режиме:
-   ```bash
-   sudo tailscale funnel --bg 443 tcp://127.0.0.1:8080
-   ```
-4. В админке Tailscale включите `MagicDNS` и Funnel для вашего нода. Адрес нода будет `<NODE_NAME>.<TAILNET>.ts.net`.
-5. **Важно для NekoBox:**
-   - Address: `<NODE_NAME>.<TAILNET>.ts.net`, Port: `443`, TLS: `true`.
-   - SNI: `<NODE_NAME>.<TAILNET>.ts.net`.
-   - Path: `/vless`.
-   - **Заголовок Host оставить пустым!** (Tailscale Funnel требует совпадения или отсутствия Host для WS).
+   *(Не используйте синтаксис `tcp://` — для WebSocket Xray требуется HTTP-проксирование на `http://127.0.0.1:8080`!)*
+3. **На клиенте (NekoBox):**
+   - `Address`: **Anycast IPv4** вашего нода (`dig +short <NODE>.<TAILNET>.ts.net`, например из подсети `185.40.234.x`) — либо домен `<NODE>.<TAILNET>.ts.net` при **Domain Strategy = `ipv4_only`**.
+   - `Port`: **`8443`**, `TLS`: `true`, `ALPN`: `http/1.1`.
+   - `SNI` и `Host`: `<NODE>.<TAILNET>.ts.net`, `Path`: `/vless`.
 
 ### Эшелон 5: Hysteria 2 + Playit.gg (Anycast UDP Relay)
-- 📖 **Подробная инструкция:** См. файл [docs/PLAYIT_SETUP_GUIDE.md](docs/PLAYIT_SETUP_GUIDE.md)
-1. Сконфигурируйте Hysteria 2 (`configs/hysteria-config.yaml`):
-   - Listen: `0.0.0.0:20443`.
-   - Auth: HTTP Webhook на `http://127.0.0.1:2054/auth` (скрипт в `configs/hysteria-panel/app.py`).
-2. Запустите Playit CLI:
+- 📖 **Подробная инструкция:** [`docs/PLAYIT_SETUP_GUIDE.md`](docs/PLAYIT_SETUP_GUIDE.md)
+1. Настройте секреты в `/etc/hysteria/config.yaml` и `/etc/systemd/system/hysteria-panel.service`, затем запустите сервисы:
    ```bash
    sudo playit setup
+   sudo systemctl enable --now hysteria-server hysteria-panel playit
    ```
-3. Привяжите аккаунт и создайте UDP туннель:
-   - ВНИМАНИЕ: выберите вкладку **Custom** -> **UDP** (не Minecraft и не другие игры!).
-   - Local Port: `20443`.
-4. Playit выдаст выделенный Anycast хост и порт, например `auto.playit.gg:17635`.
-5. В клиенте Hysteria 2 укажите:
-   - Server: чистый IPv4 Playit (например `147.185.x.x:17635`).
-   - SNI: домен вашего самоподписанного сертификата.
-   - Auth: ваши логин/пароль.
+2. В панели Playit.gg выберите **строго `Custom` -> `UDP`** (НЕ Minecraft / Terraria!), Local Port `20443`.
+3. В клиенте укажите **числовой IPv4 Playit** (`147.185.x.x:<PORT>`), `SNI: bing.com`, `insecure: true`, `Hop Interval: 0`.
+
+---
+
+## ⚠️ Частые ошибки и их решение
+
+1. **`connectex: The requested address is not valid in its context` (`WinSock 10049`) в Windows/NekoBox:**
+   - **Причина:** В вашей сети Windows нет рабочего IPv6, но домены туннелей (`*.ts.net`, `*.shares.zrok.io`, `*.tun.ply.gg`, `*.workers.dev`) отдают `AAAA`-записи IPv6. Настройка «Маршрутизация -> Стратегия IPv4» в NekoBox действует только на сайты *внутри* VPN, а не на подключение к самому серверу.
+   - **Фикс:** В свойствах профиля в NekoBox переключите **`Domain Strategy` -> `IPv4 Only`** либо впишите в поле `Address` прямой **IPv4-адрес шлюза**, оставив домен в `SNI` и `Host`.
+2. **`bind: address already in use` при запуске Xray на порту 443:**
+   - **Причина:** Tailscale Funnel запущен с `--https=443`, заняв `tailscale0:443`.
+   - **Фикс:** Переведите Tailscale Funnel на `--https=8443` (`sudo tailscale funnel reset && sudo tailscale funnel --bg --https=8443 http://127.0.0.1:8080`), либо явно пропишите IP сетевого интерфейса VPS в поле `Listen` инбаунда `443` в 3X-UI.
 
 ---
 
 ## 🔒 Безопасность и конфиденциальность
 
-- Никакие приватные ключи, токены и реальные IP-адреса не должны публиковаться в открытом доступе.
-- Всегда используйте фаервол (`ufw`), блокируйте лишние порты.
+- Все конфигурации в репозитории обезличены — перед запуском в продакшене замените шаблонные пароли, UUID и секреты в `hysteria-config.yaml` и `hysteria-panel.service`.
+- Всегда используйте фаервол (`ufw`), ограничивайте доступ к панелям (`2053`, `2054`).
 - Репозиторий предназначен для резервного копирования и автономного развертывания.

@@ -1,7 +1,14 @@
 {
-  "remark": "3X-UI Inbound Template Definitions",
+  "remark": "3X-UI Inbound Template Definitions (No Port Conflicts)",
+  "notes": [
+    "1. Echelon 1 (VLESS Reality Stealth) runs on port 443. Keep Tailscale Funnel on 8443 so 0.0.0.0:443 stays free.",
+    "2. If you want BOTH Reality Stealth AND Tailscale Funnel on port 443, set 'listen' on inbound-443-reality to your VPS NIC IPv4 (from `ip -4 route get 1.1.1.1`) instead of empty string.",
+    "3. Client emails MUST be unique across all inbounds in 3X-UI database (UNIQUE constraint in client_traffics).",
+    "4. Leaving 'flow' empty ('') maximizes compatibility across sing-box and older/mobile Xray clients."
+  ],
   "inbounds": [
     {
+      "listen": "",
       "port": 443,
       "protocol": "vless",
       "tag": "inbound-443-reality",
@@ -9,11 +16,12 @@
         "clients": [
           {
             "id": "<YOUR_CLIENT_UUID>",
-            "flow": "xtls-rprx-vision",
+            "flow": "",
             "email": "user-reality-443"
           }
         ],
-        "decryption": "none"
+        "decryption": "none",
+        "fallbacks": []
       },
       "streamSettings": {
         "network": "tcp",
@@ -24,17 +32,61 @@
           "xver": 0,
           "serverNames": [
             "gateway.icloud.com",
-            "www.apple.com"
+            "swdist.apple.com"
           ],
           "privateKey": "<SERVER_REALITY_PRIVATE_KEY>",
           "shortIds": [
-            "",
+            "74",
             "0123456789abcdef"
           ]
         }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"]
       }
     },
     {
+      "listen": "",
+      "port": 25652,
+      "protocol": "vless",
+      "tag": "inbound-25652-reality-backup",
+      "settings": {
+        "clients": [
+          {
+            "id": "<YOUR_CLIENT_UUID>",
+            "flow": "",
+            "email": "user-reality-25652"
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "sony.com:443",
+          "xver": 0,
+          "serverNames": [
+            "sony.com",
+            "www.sony.com"
+          ],
+          "privateKey": "<SERVER_REALITY_PRIVATE_KEY_ALT>",
+          "shortIds": [
+            "f26d",
+            "0123456789abcdef"
+          ]
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"]
+      }
+    },
+    {
+      "listen": "",
       "port": 8080,
       "protocol": "vless",
       "tag": "inbound-8080-ws",
@@ -42,17 +94,26 @@
         "clients": [
           {
             "id": "<YOUR_CLIENT_UUID>",
+            "flow": "",
             "email": "user-tunnel-8080"
           }
         ],
-        "decryption": "none"
+        "decryption": "none",
+        "fallbacks": []
       },
       "streamSettings": {
         "network": "ws",
         "security": "none",
         "wsSettings": {
-          "path": "/vless"
+          "acceptProxyProtocol": false,
+          "path": "/vless",
+          "host": "",
+          "headers": {}
         }
+      },
+      "sniffing": {
+        "enabled": false,
+        "destOverride": ["http", "tls", "quic"]
       }
     }
   ]

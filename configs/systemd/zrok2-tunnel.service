@@ -1,12 +1,13 @@
 [Unit]
-Description=Zrok v2 Public Share Tunnel (Port 8080)
-After=network.target
+Description=Zrok v2 Public Reverse Proxy Tunnel (Port 8080)
+After=network.target x-ui.service
 
 [Service]
 Type=simple
 User=root
-# Adjust target local port if your Xray WS inbound uses another port
-ExecStart=/usr/local/bin/zrok share public 8080 --backend-mode web --headless
+Environment=HOME=/root
+# Proxies public HTTPS traffic to local Xray VLESS+WS inbound on 127.0.0.1:8080
+ExecStart=/usr/local/bin/zrok2 share public 127.0.0.1:8080 --backend-mode proxy --headless
 Restart=always
 RestartSec=5
 LimitNOFILE=65535
