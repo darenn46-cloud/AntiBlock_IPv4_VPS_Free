@@ -77,6 +77,7 @@ sudo ./setup_server.sh
 - Клиент подключается напрямую на `<YOUR_VPS_IP>:443`.
 
 ### Эшелон 2: Cloudflare Worker + VLESS WS (Порт 8080)
+- 📖 **Подробная инструкция:** См. файл [docs/CLOUDFLARE_WORKER_GUIDE.md](docs/CLOUDFLARE_WORKER_GUIDE.md)
 1. В 3X-UI создается Inbound: Port `8080`, Protocol `VLESS`, Network `ws`, Path `/vless`.
 2. В Cloudflare создается бесплатный Worker со скриптом из `configs/cloudflare-worker.js`.
 3. Замените в воркере:
@@ -120,6 +121,7 @@ sudo ./setup_server.sh
    - **Заголовок Host оставить пустым!** (Tailscale Funnel требует совпадения или отсутствия Host для WS).
 
 ### Эшелон 5: Hysteria 2 + Playit.gg (Anycast UDP Relay)
+- 📖 **Подробная инструкция:** См. файл [docs/PLAYIT_SETUP_GUIDE.md](docs/PLAYIT_SETUP_GUIDE.md)
 1. Сконфигурируйте Hysteria 2 (`configs/hysteria-config.yaml`):
    - Listen: `0.0.0.0:20443`.
    - Auth: HTTP Webhook на `http://127.0.0.1:2054/auth` (скрипт в `configs/hysteria-panel/app.py`).
