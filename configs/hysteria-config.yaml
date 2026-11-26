@@ -1,0 +1,27 @@
+# Hysteria 2 Server Configuration Template
+listen: :20443
+
+tls:
+  cert: /etc/hysteria/server.crt
+  key: /etc/hysteria/server.key
+
+auth:
+  type: http
+  http:
+    url: http://127.0.0.1:2054/auth
+
+quic:
+  initStreamReceiveWindow: 8388608
+  maxStreamReceiveWindow: 8388608
+  initConnReceiveWindow: 20971520
+  maxConnReceiveWindow: 20971520
+  maxIdleTimeout: 30s
+  keepAlivePeriod: 10s
+
+bandwidth:
+  up: 100 mbps
+  down: 100 mbps
+
+ignoreClientBandwidth: false
+disableUDP: false
+udpIdleTimeout: 60s

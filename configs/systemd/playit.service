@@ -1,0 +1,14 @@
+[Unit]
+Description=Playit.gg Tunnel Client
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/playit
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

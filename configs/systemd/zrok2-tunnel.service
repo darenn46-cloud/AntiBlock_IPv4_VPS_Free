@@ -1,0 +1,15 @@
+[Unit]
+Description=Zrok v2 Public Share Tunnel (Port 8080)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+# Adjust target local port if your Xray WS inbound uses another port
+ExecStart=/usr/local/bin/zrok share public 8080 --backend-mode web --headless
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

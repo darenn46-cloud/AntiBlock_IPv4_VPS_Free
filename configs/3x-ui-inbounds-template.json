@@ -1,0 +1,59 @@
+{
+  "remark": "3X-UI Inbound Template Definitions",
+  "inbounds": [
+    {
+      "port": 443,
+      "protocol": "vless",
+      "tag": "inbound-443-reality",
+      "settings": {
+        "clients": [
+          {
+            "id": "<YOUR_CLIENT_UUID>",
+            "flow": "xtls-rprx-vision",
+            "email": "user-reality-443"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "gateway.icloud.com:443",
+          "xver": 0,
+          "serverNames": [
+            "gateway.icloud.com",
+            "www.apple.com"
+          ],
+          "privateKey": "<SERVER_REALITY_PRIVATE_KEY>",
+          "shortIds": [
+            "",
+            "0123456789abcdef"
+          ]
+        }
+      }
+    },
+    {
+      "port": 8080,
+      "protocol": "vless",
+      "tag": "inbound-8080-ws",
+      "settings": {
+        "clients": [
+          {
+            "id": "<YOUR_CLIENT_UUID>",
+            "email": "user-tunnel-8080"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "/vless"
+        }
+      }
+    }
+  ]
+}

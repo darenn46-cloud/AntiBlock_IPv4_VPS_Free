@@ -1,0 +1,12 @@
+# Git Ignore for Anti-Censorship VPS Kit
+*.log
+*.db
+*.sqlite
+*.key
+*.crt
+*.pem
+*.env
+.secrets*
+credentials.txt
+__pycache__/
+*.pyc
