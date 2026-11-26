@@ -49,36 +49,36 @@
 flowchart TD
     Client["Клиент (NekoBox / Hiddify / v2rayN)"]
 
-    subgraph Echelons ["5 Эшелонов Доступа"]
-        E1["1. Direct VLESS Reality :443 (+ резерв :25652)"]
-        E2["2. Cloudflare Worker :443 -> VPS :8080 (CDN)"]
-        E3["3. Zrok v2 AWS Global Accelerator :443 (Anycast TCP)"]
-        E4["4. Tailscale Funnel :8443 (Mesh Anycast)"]
-        E5["5. Hysteria 2 UDP via Playit.gg (Anycast UDP)"]
+    subgraph Echelons ["Эшелоны Обходных Путей и Туннелей"]
+        E1["1. Cloudflare Worker :443 -> VPS :8080 (CDN Proxy)"]
+        E2["2. Zrok v2 AWS Global Accelerator :443 (Anycast TCP Tunnel)"]
+        E3["3. Tailscale Funnel :8443 (Mesh Anycast Tunnel)"]
+        E4["4. Hysteria 2 UDP via Playit.gg (Anycast UDP Tunnel)"]
+        E5["5. Резервный Reality TCP :25652 (Direct Port)"]
     end
 
     subgraph VPS ["Ваш VPS (Ubuntu 24.04)"]
-        XrayReality["Xray Core (Reality TCP :443 / :25652)"]
         XrayWS["Xray Core (VLESS WS 127.0.0.1:8080 /vless)"]
         Hysteria["Hysteria 2 (:20443 UDP + Panel/Auth :2054)"]
+        XrayDirect["Xray Core (Reality TCP :25652)"]
     end
 
-    Client -->|Прямой IPv4:443| E1 --> XrayReality
-    Client -->|Cloudflare Edge:443| E2 --> XrayWS
-    Client -->|AWS Anycast IPv4:443| E3 --> XrayWS
-    Client -->|Tailscale Edge:8443| E4 --> XrayWS
-    Client -->|Playit Anycast IPv4:UDP| E5 --> Hysteria
+    Client -->|Cloudflare Edge:443| E1 --> XrayWS
+    Client -->|AWS Anycast IPv4:443| E2 --> XrayWS
+    Client -->|Tailscale Edge:8443| E3 --> XrayWS
+    Client -->|Playit Anycast IPv4:UDP| E4 --> Hysteria
+    Client -->|Прямой порт :25652| E5 --> XrayDirect
 ```
 
 ### Сводная таблица эшелонов
 
 | Эшелон | Протокол | Внешний порт | Локальный вход VPS | Защита от блокировки | Стоимость | Назначение |
 |---|---|---|---|---|---|---|
-| **1. Direct Reality** | VLESS Reality | `:443` *(резерв `:25652`)* | Xray Reality `:443` | Маскировка под Apple TLS (`gateway.icloud.com:443`) | $0 | Максимальная скорость и минимальный пинг |
-| **2. Cloudflare Worker** | VLESS WS | `:443` (CF CDN) | Xray WS `:8080` (`/vless`) | IP VPS скрыт за сетью Cloudflare | $0 | Обход бана IP через Edge Relay |
-| **3. Zrok v2 AWS Tunnel** | VLESS WS | `:443` (AWS ALB) | Xray WS `127.0.0.1:8080` | Трафик идёт через Amazon Global Accelerator | $0 | Надёжный Anycast TCP резерв |
-| **4. Tailscale Funnel** | VLESS WS | **`:8443`** *(без конфликта с 443!)* | Xray WS `127.0.0.1:8080` | Трафик идёт через дата-центры Tailscale | $0 | Белый домен с Let's Encrypt без WireGuard на клиенте |
-| **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Playit UDP `:PORT` | Hysteria `:20443` UDP | Обход бана IP и блокировок UDP/NAT | $0 | Звонки (Discord/TG), игры, плохой интернет |
+| **1. Cloudflare Worker** | VLESS WS | `:443` (CF CDN) | Xray WS `:8080` (`/vless`) | IP VPS скрыт за сетью Cloudflare | $0 | Обход бана IP через Edge Relay |
+| **2. Zrok v2 AWS Tunnel** | VLESS WS | `:443` (AWS ALB) | Xray WS `127.0.0.1:8080` | Трафик идёт через Amazon Global Accelerator | $0 | Надёжный Anycast TCP резерв |
+| **3. Tailscale Funnel** | VLESS WS | **`:8443`** | Xray WS `127.0.0.1:8080` | Трафик идёт через дата-центры Tailscale | $0 | Белый домен с Let's Encrypt без WireGuard на клиенте |
+| **4. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Playit UDP `:PORT` | Hysteria `:20443` UDP | Обход бана IP и блокировок UDP/NAT | $0 | Звонки (Discord/TG), игры, плохой интернет |
+| **5. Резервный Direct** | VLESS Reality | `:25652` | Xray Reality `:25652` | Маскировка под Sony TLS (`sony.com`) | $0 | Прямой резервный канал |
 
 <img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/3c8e3723-2d3a-4026-8015-5ddd574378d6" />
 
