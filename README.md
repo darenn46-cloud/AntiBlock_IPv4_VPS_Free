@@ -82,11 +82,13 @@ flowchart TD
 
 <img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/3c8e3723-2d3a-4026-8015-5ddd574378d6" />
 
-> [!IMPORTANT]
-> **Почему Tailscale Funnel вынесен на порт `8443` (а не `443`):**  
-> При запуске `tailscale funnel --bg --https=443 ...` демон `tailscaled` занимает порт `443` на интерфейсе `tailscale0` (`100.x.y.z:443`). Если в 3X-UI инбаунд `443` слушает все интерфейсы по умолчанию (`0.0.0.0:443`), Xray падает с ошибкой **`bind: address already in use`** и Stealth Reality перестаёт работать (а перенос Stealth на нестандартный порт вроде `444` ломает логику маскировки под Apple:443).  
-> * По умолчанию в этом комплекте **Stealth Reality забирает настоящий `443`**, а **Tailscale Funnel работает на официальном порту `8443`** (`443`, `8443`, `10000` разрешены в Tailscale).  
-> * *Если вам принципиально нужны ОБА сервиса на `443`:* в 3X-UI у инбаунда `443-reality` задайте в поле **`Listen`** конкретный IP сетевого интерфейса VPS (`ip -4 route get 1.1.1.1`) вместо пустого `0.0.0.0` — тогда Xray сядет на `eth0/ens3:443`, а Tailscale на `tailscale0:443`, и конфликта сокетов не будет.
+> [!TIP]
+> **Особенности портов Tailscale Funnel (`8443` vs `443`):**  
+> Tailscale Funnel официально поддерживает внешние порты: **`443`**, **`8443`** и **`10000`**.  
+> - Если порт `443` на сервере уже занят другим веб-сервером или службой, Tailscale Funnel запускается на официальном альтернативном порту **`8443`**:  
+>   `tailscale funnel --bg --https=8443 http://127.0.0.1:8080`  
+> - Это позволяет туннелю работать полностью параллельно с остальными сервисами на VPS без конфликта сетевых сокетов (`bind: address already in use`).  
+> - В клиентском профиле (NekoBox / Hiddify) при этом просто указывается порт **`8443`** и адрес шлюза Tailscale. В отличие от прямого подключения к заблокированному IP VPS, туннель выходит через белые Anycast-сервера Tailscale, где трафик не блокируется.
 
 ---
 
@@ -112,12 +114,10 @@ sudo ./setup_server.sh
 
 ## ⚙️ Пошаговая настройка каждого эшелона
 
-### Эшелон 1: VLESS Reality Stealth (Порт 443 + резерв 25652)
+### Эшелон 1: Запасной прямой канал Reality (Порт 25652)
 - Откройте панель 3X-UI (`https://<YOUR_VPS_IP>:2053`) и импортируйте схему из [`configs/3x-ui-inbounds-template.json`](configs/3x-ui-inbounds-template.json).
-- **Inbound #1 (`inbound-443-reality`):** Port `443`, Protocol `VLESS`, Security `Reality`, Dest `gateway.icloud.com:443`, `flow: ""` (пусто для совместимости).
-- **Inbound #2 (`inbound-25652-reality-backup`):** запасной Reality-канал на нестандартном порту (`sony.com:443`).
-- **Inbound #3 (`inbound-8080-ws`):** Port `8080`, Protocol `VLESS`, Network `ws`, Path `/vless`, Security `none` — единая точка входа для Эшелонов 2, 3 и 4.
-- **Важно для клиента (NekoBox / sing-box / xray-core):** если при `fp=chrome` на `gateway.icloud.com` возникает сбой рукопожатия (постквантовый TLS в новых версиях `xray.exe`), переключите `fp` на `ios` или `edge` (либо используйте `sing-box`).
+- **Inbound #1 (`inbound-25652-reality`):** прямой VLESS Reality на порту `25652` (маскировка `sony.com:443`, `flow: ""` пусто для совместимости со всеми клиентами). Используется как прямой канал, если провайдер не глушит подсеть хостинга.
+- **Inbound #2 (`inbound-8080-ws`):** Port `8080`, Protocol `VLESS`, Network `ws`, Path `/vless`, Security `none` — единый локальный бэкенд для всех внешних обратных туннелей (Эшелоны 2, 3 и 4).
 
 ### Эшелон 2: Cloudflare Worker + VLESS WS (Порт 8080)
 - 📖 **Подробная инструкция:** [`docs/CLOUDFLARE_WORKER_GUIDE.md`](docs/CLOUDFLARE_WORKER_GUIDE.md)
