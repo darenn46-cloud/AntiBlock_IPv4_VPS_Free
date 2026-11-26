@@ -1,8 +1,7 @@
-# Multi-Echelon Anti-Censorship VPS Bypass Kit (0-Cost Edition)
-> **Схема 100% бесплатного обхода блокировки IPv4 вашего VPS провайдерами и ТСПУ (РКН)**
+# Multi-Echelon VPS Network Kit (0-Cost Edition)
+> **Схема 100% бесплатного обхода блокировки IPv4 вашего VPS провайдерами и сетевыми фильтрами**
 
 [![Author: darenN](https://img.shields.io/badge/Author-darenN-blue.svg?style=flat&logo=github)](#)
-[![Topic: Anti-Censorship](https://img.shields.io/badge/topic-anti--censorship-blue.svg)](#)
 [![Topic: VPN Bypass](https://img.shields.io/badge/topic-vpn--bypass-green.svg)](#)
 [![Topic: Reverse Tunnel](https://img.shields.io/badge/topic-reverse--tunnel-orange.svg)](#)
 [![Topic: 0-Cost](https://img.shields.io/badge/cost-$0%20free-success.svg)](#)
@@ -11,7 +10,7 @@
 > **От автора (by darenN):**  
 > *Данные действия протестированы лично мной, обходы искал с июня 2026 года, данные обходы не нашел в свободных источниках, все решения и победы достиг с помощью бесплатных подписок на ИИ.*
 
-`vpn` • `anti-censorship` • `bypass-censorship` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok` • `tailscale-funnel` • `playit-gg` • `anycast` • `tspu-bypass` • `rkn-bypass` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
+`vpn` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok` • `tailscale-funnel` • `playit-gg` • `anycast` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
 
 ---
 
@@ -20,11 +19,11 @@
 Если вы искали решение по любому из этих запросов — этот репозиторий полностью решает вашу проблему:
 
 - **"Заблокировали IP адрес VPS сервера что делать"** — автоматический переход на Anycast CDN (Cloudflare / Zrok / Playit).
-- **"Перестал работать Reality / VLESS / Shadowsocks"** — обход ТСПУ блокировок через WebSocket и туннели.
-- **"РКН заблокировал VPS / подсеть хостинга"** — маскировка за дата-центрами Amazon AWS, Cloudflare и Tailscale.
+- **"Перестал работать Reality / VLESS / Shadowsocks"** — обход сетевых фильтров через WebSocket и туннели.
+- **"Провайдер заблокировал VPS / подсеть хостинга"** — маскировка за дата-центрами Amazon AWS, Cloudflare и Tailscale.
 - **"Как сделать свой бесплатный VPN без бана"** — пошаговый подъем с нуля за 15 минут.
 - **"Провайдер глушит UDP / WireGuard / OpenVPN"** — протокол Hysteria 2 через Playit.gg пробивает любые ограничения.
-- **"Бесплатный reverse proxy туннель для обхода блокировок"** — Zrok, Cloudflare Workers, Tailscale Funnel.
+- **"Бесплатный reverse proxy туннель"** — Zrok, Cloudflare Workers, Tailscale Funnel.
 - **"Не работает Ютуб / Дискорд / Инстаграм на своем сервере"** — готовые профили маршрутизации для NekoBox и Hiddify.
 
 ---
@@ -33,10 +32,10 @@
 <summary><b>Показать полный список ключевых поисковых тегов (SEO Keywords)</b></summary>
 
 ### Поисковые запросы на русском:
-`vpn`, `впн`, `бесплатный vpn`, `свой vpn`, `обход блокировок`, `обход блокировки vps`, `заблокировали vps`, `бан ip vps`, `тспу`, `ркн`, `блокировка ютуб`, `обход блокировки discord`, `дискорд vpn`, `youtube vpn`, `не работает vless`, `reality заблокировали`, `как обойти блокировку vps`, `туннель для vpn`, `обратный прокси`, `бесплатный прокси`, `cloudflare vless worker`, `zrok vpn`, `playit vpn`, `tailscale funnel vpn`, `hysteria 2 настройка`, `3x ui настройка`, `nekobox настройка`, `hiddify настройка`, `прокси для россии`, `антицензура`, `white list обход`, `любой провайдер`
+`vpn`, `впн`, `бесплатный vpn`, `свой vpn`, `обход блокировок`, `обход блокировки vps`, `заблокировали vps`, `бан ip vps`, `блокировка ютуб`, `обход блокировки discord`, `дискорд vpn`, `youtube vpn`, `не работает vless`, `reality заблокировали`, `как обойти блокировку vps`, `туннель для vpn`, `обратный прокси`, `бесплатный прокси`, `cloudflare vless worker`, `zrok vpn`, `playit vpn`, `tailscale funnel vpn`, `hysteria 2 настройка`, `3x ui настройка`, `nekobox настройка`, `hiddify настройка`, `прокси для россии`, `любой провайдер`
 
 ### International / Global English Search Queries:
-`free-vpn`, `vps-ban-bypass`, `anti-censorship`, `censorship-circumvention`, `great-firewall-bypass`, `rkn-bypass`, `tspu-bypass`, `unblock-vps`, `free-reverse-proxy`, `free-tunnel`, `vless`, `vless-reality`, `hysteria2`, `xray`, `xray-core`, `3x-ui`, `sing-box`, `nekobox`, `hiddify`, `cloudflare-worker-vless`, `zrok-tunnel`, `tailscale-funnel-proxy`, `playit-gg-tunnel`, `udp-tunneling`, `quic-proxy`, `shadowsocks-blocked`, `iran-censorship`, `russia-censorship`, `isp-blocking`, `dpi-bypass`
+`free-vpn`, `vps-ban-bypass`, `unblock-vps`, `free-reverse-proxy`, `free-tunnel`, `vless`, `vless-reality`, `hysteria2`, `xray`, `xray-core`, `3x-ui`, `sing-box`, `nekobox`, `hiddify`, `cloudflare-worker-vless`, `zrok-tunnel`, `tailscale-funnel-proxy`, `playit-gg-tunnel`, `udp-tunneling`, `quic-proxy`, `shadowsocks-blocked`, `isp-blocking`, `dpi-bypass`
 
 </details>
 
@@ -79,7 +78,7 @@ flowchart TD
 | **2. Cloudflare Worker** | VLESS WS | Бесплатный воркер CF | IP вашего сервера скрыт за CDN | $0 | Бесплатный CDN-прокси |
 | **3. Zrok AWS Tunnel** | VLESS WS | AWS Anycast Accelerator | Обход бана IPv4 через сеть Amazon | $0 | Надежный TCP резерв |
 | **4. Tailscale Funnel** | VLESS WS | Tailscale Funnel Anycast | Трафик идет через дата-центры Tailscale | $0 | Альтернативный Mesh-туннель |
-| **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Anycast UDP Relay | Обход бана UDP и пробитие любых NAT/ТСПУ | $0 | Игры, звонки, плохой интернет |
+| **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Anycast UDP Relay | Обход бана UDP и пробитие любых NAT | $0 | Игры, звонки, плохой интернет |
 
 ---
 
@@ -90,7 +89,7 @@ flowchart TD
 
 Склонируйте репозиторий и запустите установщик:
 ```bash
-git clone <URL_ЭТОГО_РЕПОЗИТОРИЯ> /opt/vps-bypass-kit
+git clone https://github.com/darenn46-cloud/AntiBlock_IPv4_VPS_Free.git /opt/vps-bypass-kit
 cd /opt/vps-bypass-kit/scripts
 chmod +x setup_server.sh
 sudo ./setup_server.sh
@@ -167,18 +166,18 @@ sudo ./setup_server.sh
    sudo playit setup
    ```
 3. Привяжите аккаунт и создайте UDP туннель:
-   - Type: `Custom UDP`.
+   - ВНИМАНИЕ: выберите вкладку **Custom** -> **UDP** (не Minecraft и не другие игры!).
    - Local Port: `20443`.
 4. Playit выдаст выделенный Anycast хост и порт, например `auto.playit.gg:17635`.
 5. В клиенте Hysteria 2 укажите:
-   - Server: `auto.playit.gg:17635`.
-   - SNI: домен вашего самоподписанного сертификата (или IP сервера с `insecure: true`).
+   - Server: чистый IPv4 Playit (например `147.185.x.x:17635`).
+   - SNI: домен вашего самоподписанного сертификата.
    - Auth: ваши логин/пароль.
 
 ---
 
 ## 🔒 Безопасность и конфиденциальность
 
-- Никакие приватные ключи, токены и реальные IP-адреса **не должны** публиковаться в открытом доступе.
+- Никакие приватные ключи, токены и реальные IP-адреса не должны публиковаться в открытом доступе.
 - Всегда используйте фаервол (`ufw`), блокируйте лишние порты.
-- Репозиторий предназначен для частного резервного копирования и автономного развертывания.
+- Репозиторий предназначен для резервного копирования и автономного развертывания.
