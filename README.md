@@ -1,10 +1,15 @@
 # Multi-Echelon Anti-Censorship VPS Bypass Kit (0-Cost Edition)
 > **Схема 100% бесплатного обхода блокировки IPv4 вашего VPS провайдерами и ТСПУ (РКН)**
 
+[![Author: darenN](https://img.shields.io/badge/Author-darenN-blue.svg?style=flat&logo=github)](#)
 [![Topic: Anti-Censorship](https://img.shields.io/badge/topic-anti--censorship-blue.svg)](#)
 [![Topic: VPN Bypass](https://img.shields.io/badge/topic-vpn--bypass-green.svg)](#)
 [![Topic: Reverse Tunnel](https://img.shields.io/badge/topic-reverse--tunnel-orange.svg)](#)
 [![Topic: 0-Cost](https://img.shields.io/badge/cost-$0%20free-success.svg)](#)
+
+> [!NOTE]
+> **От автора (by darenN):**  
+> *Данные действия протестированы лично мной, обходы искал с июня 2026 года, данные обходы не нашел в свободных источниках, все решения и победы достиг с помощью бесплатных подписок на ИИ.*
 
 `vpn` • `anti-censorship` • `bypass-censorship` • `vps-bypass` • `reverse-proxy` • `reverse-tunnel` • `tunneling` • `vless-reality` • `hysteria2` • `xray-core` • `3x-ui` • `cloudflare-workers` • `zrok` • `tailscale-funnel` • `playit-gg` • `anycast` • `tspu-bypass` • `rkn-bypass` • `обход-блокировок` • `бесплатный-vpn` • `туннелирование` • `обратный-прокси`
 
