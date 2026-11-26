@@ -80,7 +80,8 @@ flowchart TD
 | **4. Tailscale Funnel** | VLESS WS | Tailscale Funnel Anycast | Трафик идет через дата-центры Tailscale | $0 | Альтернативный Mesh-туннель |
 | **5. Playit.gg Hysteria** | Hysteria 2 (QUIC) | Anycast UDP Relay | Обход бана UDP и пробитие любых NAT | $0 | Игры, звонки, плохой интернет |
 
-<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/7f992e4f-5664-40ff-beb0-70b902bbcb33" />
+<img width="2752" height="1536" alt="image" src="https://github.com/user-attachments/assets/3c8e3723-2d3a-4026-8015-5ddd574378d6" />
+
 
 
 ---
